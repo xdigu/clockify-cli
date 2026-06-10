@@ -3,7 +3,6 @@ import { ClockifyApiError } from "../clockify/client.js";
 import { listProjects } from "../clockify/projects.js";
 import { createTimeEntry } from "../clockify/timeEntries.js";
 import { loadConfig, resolveApiKey } from "../config/store.js";
-import type { AppConfig, ClockifyProject, LunchAssignment, PlannedEntry, TaskInput } from "../types.js";
 import { todayDateString, formatLocalDateTime, toIsoUtc } from "../utils/datetime.js";
 import { parseDurationToMinutes, formatMinutes } from "../utils/duration.js";
 import { buildSchedule, validateDayWindow } from "../utils/schedule.js";

@@ -1,4 +1,4 @@
-export interface AppConfig {
+interface AppConfig {
   apiKey: string;
   workspaceId: string;
   workspaceName: string;
@@ -8,7 +8,7 @@ export interface AppConfig {
   workEnd?: string;
 }
 
-export interface ClockifyUser {
+interface ClockifyUser {
   id: string;
   email: string;
   name: string;
@@ -16,17 +16,17 @@ export interface ClockifyUser {
   defaultWorkspace: string;
 }
 
-export interface ClockifyWorkspace {
+interface ClockifyWorkspace {
   id: string;
   name: string;
 }
 
-export interface ClockifyClientInfo {
+interface ClockifyClientInfo {
   id: string;
   name: string;
 }
 
-export interface ClockifyProject {
+interface ClockifyProject {
   id: string;
   name: string;
   clientId?: string;
@@ -34,7 +34,7 @@ export interface ClockifyProject {
   archived: boolean;
 }
 
-export interface CreateTimeEntryPayload {
+interface CreateTimeEntryPayload {
   start: string;
   end: string;
   description: string;
@@ -42,7 +42,7 @@ export interface CreateTimeEntryPayload {
   billable?: boolean;
 }
 
-export interface ClockifyTimeEntry {
+interface ClockifyTimeEntry {
   id: string;
   description?: string;
   start: string;
@@ -50,14 +50,14 @@ export interface ClockifyTimeEntry {
   projectId?: string;
 }
 
-export type LunchAssignment = "before" | "after" | "both";
+type LunchAssignment = "before" | "after" | "both";
 
-export interface TaskInput {
+interface TaskInput {
   description: string;
   assignment?: LunchAssignment;
 }
 
-export interface PlannedEntry {
+interface PlannedEntry {
   taskDescription: string;
   shortDescription: string;
   start: Date;
@@ -67,7 +67,7 @@ export interface PlannedEntry {
   projectName?: string;
 }
 
-export interface DayWindow {
+interface DayWindow {
   workStart: string;
   lunchStart: string;
   lunchEnd: string;

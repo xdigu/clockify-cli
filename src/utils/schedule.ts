@@ -1,4 +1,3 @@
-import type { DayWindow, LunchAssignment, PlannedEntry, TaskInput } from "../types.js";
 import { addMinutes, combineDateAndTime, minutesBetween, parseTimeOfDay } from "./datetime.js";
 import { buildShortDescription } from "./keywords.js";
 

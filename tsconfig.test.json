@@ -4,7 +4,14 @@
     "rootDir": ".",
     "noEmit": true,
     "isolatedModules": true,
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "typings/**/*.d.ts"
+  ]
 }

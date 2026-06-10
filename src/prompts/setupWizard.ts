@@ -2,7 +2,6 @@ import { confirm, input, password, select } from "@inquirer/prompts";
 import { ClockifyApiError } from "../clockify/client.js";
 import { getCurrentUser, listWorkspaces } from "../clockify/user.js";
 import { loadConfig, saveConfig } from "../config/store.js";
-import type { AppConfig } from "../types.js";
 
 export interface SetupWizardDeps {
   loadConfigFn?: typeof loadConfig;

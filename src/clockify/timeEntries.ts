@@ -1,5 +1,4 @@
 import { clockifyRequest } from "./client.js";
-import type { ClockifyTimeEntry, CreateTimeEntryPayload } from "../types.js";
 
 export async function createTimeEntry(
   apiKey: string,
