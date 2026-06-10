@@ -1,4 +1,4 @@
-import { clockifyRequest } from "./client.js";
+import { clockifyRequest } from "@clockify/client";
 
 export async function getCurrentUser(apiKey: string): Promise<ClockifyUser> {
   return clockifyRequest<ClockifyUser>(apiKey, "/user");

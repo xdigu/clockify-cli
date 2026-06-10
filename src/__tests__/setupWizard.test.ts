@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { ClockifyApiError } from "../src/clockify/client.js";
-import { runSetupWizard } from "../src/prompts/setupWizard.js";
+import { ClockifyApiError } from "../clockify/client";
+import { runSetupWizard } from "../prompts/setupWizard";
 
 describe("runSetupWizard", () => {
   it("returns existing config when user declines reconfigure", async () => {
@@ -25,7 +25,13 @@ describe("runSetupWizard", () => {
     const result = await runSetupWizard(true, {
       loadConfigFn: async () => null,
       saveConfigFn,
-      getCurrentUserFn: async () => ({ id: "u1", email: "a@b.com", name: "User", activeWorkspace: "ws-1", defaultWorkspace: "ws-1" }),
+      getCurrentUserFn: async () => ({
+        id: "u1",
+        email: "a@b.com",
+        name: "User",
+        activeWorkspace: "ws-1",
+        defaultWorkspace: "ws-1",
+      }),
       listWorkspacesFn: async () => [{ id: "ws-1", name: "Main" }],
       promptPassword: jest.fn().mockResolvedValue(" secret-key "),
       promptSelect: jest.fn().mockResolvedValue("ws-1"),
@@ -66,23 +72,35 @@ describe("runSetupWizard", () => {
     await expect(
       runSetupWizard(true, {
         loadConfigFn: async () => null,
-        getCurrentUserFn: async () => ({ id: "u1", email: "a@b.com", name: "User", activeWorkspace: "ws-1", defaultWorkspace: "ws-1" }),
+        getCurrentUserFn: async () => ({
+          id: "u1",
+          email: "a@b.com",
+          name: "User",
+          activeWorkspace: "ws-1",
+          defaultWorkspace: "ws-1",
+        }),
         listWorkspacesFn: async () => [],
         promptPassword: jest.fn().mockResolvedValue("key"),
       }),
     ).rejects.toThrow(/No Clockify workspaces/);
   });
   it("validates empty api keys", async () => {
-    const promptPassword = jest.fn().mockImplementation(async (config: {
-      validate?: (value: string) => true | string;
-    }) => {
-      expect(config.validate?.("   ")).toBe("API key is required.");
-      return "key";
-    });
+    const promptPassword = jest
+      .fn()
+      .mockImplementation(async (config: { validate?: (value: string) => true | string }) => {
+        expect(config.validate?.("   ")).toBe("API key is required.");
+        return "key";
+      });
 
     await runSetupWizard(true, {
       loadConfigFn: async () => null,
-      getCurrentUserFn: async () => ({ id: "u1", email: "a@b.com", name: "User", activeWorkspace: "ws-1", defaultWorkspace: "ws-1" }),
+      getCurrentUserFn: async () => ({
+        id: "u1",
+        email: "a@b.com",
+        name: "User",
+        activeWorkspace: "ws-1",
+        defaultWorkspace: "ws-1",
+      }),
       listWorkspacesFn: async () => [{ id: "ws-1", name: "Main" }],
       saveConfigFn: jest.fn(),
       promptPassword,
@@ -108,7 +126,13 @@ describe("runSetupWizard", () => {
     const result = await runSetupWizard(true, {
       loadConfigFn: async () => null,
       saveConfigFn: jest.fn(),
-      getCurrentUserFn: async () => ({ id: "u1", email: "a@b.com", name: "User", activeWorkspace: "ws-1", defaultWorkspace: "ws-1" }),
+      getCurrentUserFn: async () => ({
+        id: "u1",
+        email: "a@b.com",
+        name: "User",
+        activeWorkspace: "ws-1",
+        defaultWorkspace: "ws-1",
+      }),
       listWorkspacesFn: async () => [{ id: "ws-1", name: "Main" }],
       promptPassword: jest.fn().mockResolvedValue("key"),
       promptSelect: jest.fn().mockResolvedValue("missing-id"),
@@ -125,17 +149,23 @@ describe("runSetupWizard", () => {
   });
 
   it("accepts non-empty api keys in validation", async () => {
-    const promptPassword = jest.fn().mockImplementation(async (config: {
-      validate?: (value: string) => true | string;
-    }) => {
-      expect(config.validate?.(" key ")).toBe(true);
-      return " key ";
-    });
+    const promptPassword = jest
+      .fn()
+      .mockImplementation(async (config: { validate?: (value: string) => true | string }) => {
+        expect(config.validate?.(" key ")).toBe(true);
+        return " key ";
+      });
 
     await runSetupWizard(true, {
       loadConfigFn: async () => null,
       saveConfigFn: jest.fn(),
-      getCurrentUserFn: async () => ({ id: "u1", email: "a@b.com", name: "User", activeWorkspace: "ws-1", defaultWorkspace: "ws-1" }),
+      getCurrentUserFn: async () => ({
+        id: "u1",
+        email: "a@b.com",
+        name: "User",
+        activeWorkspace: "ws-1",
+        defaultWorkspace: "ws-1",
+      }),
       listWorkspacesFn: async () => [{ id: "ws-1", name: "Main" }],
       promptPassword,
       promptSelect: jest.fn().mockResolvedValue("ws-1"),
@@ -148,5 +178,4 @@ describe("runSetupWizard", () => {
       log: jest.fn(),
     });
   });
-
 });

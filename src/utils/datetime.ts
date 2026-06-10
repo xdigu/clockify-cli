@@ -1,6 +1,9 @@
 const TIME_PATTERN = /^([01]?\d|2[0-3]):([0-5]\d)$/;
 
-export function parseTimeOfDay(value: string, fieldName: string): { hours: number; minutes: number } {
+export function parseTimeOfDay(
+  value: string,
+  fieldName: string,
+): { hours: number; minutes: number } {
   const match = value.trim().match(TIME_PATTERN);
   if (!match) {
     throw new Error(`Invalid ${fieldName} time: "${value}". Use HH:MM format.`);

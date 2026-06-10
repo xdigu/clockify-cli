@@ -1,4 +1,4 @@
-import { clockifyRequest } from "./client.js";
+import { clockifyRequest } from "@clockify/client";
 
 interface ProjectsPage {
   id: string;

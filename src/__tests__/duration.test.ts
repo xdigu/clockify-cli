@@ -1,4 +1,5 @@
-import { formatMinutes, parseDurationToMinutes } from "../src/utils/duration.js";
+import { describe, expect, it } from "@jest/globals";
+import { formatMinutes, parseDurationToMinutes } from "../utils/duration";
 
 describe("parseDurationToMinutes", () => {
   it("parses whole hours", () => {

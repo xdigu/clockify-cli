@@ -1,11 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
-import { buildShortDescription } from "../src/utils/keywords.js";
+import { buildShortDescription } from "../utils/keywords";
 
 describe("buildShortDescription", () => {
   it("preserves ticket ids and removes stop words", () => {
-    const result = buildShortDescription(
-      "worked on fixing the login bug for PROJ-123 auth flow",
-    );
+    const result = buildShortDescription("worked on fixing the login bug for PROJ-123 auth flow");
     expect(result).toContain("PROJ-123");
     expect(result.toLowerCase()).not.toContain("the");
   });

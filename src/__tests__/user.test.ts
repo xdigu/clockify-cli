@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
-import { getCurrentUser, listWorkspaces } from "../src/clockify/user.js";
+import { getCurrentUser, listWorkspaces } from "../clockify/user";
 
 describe("clockify user api", () => {
   const originalFetch = global.fetch;

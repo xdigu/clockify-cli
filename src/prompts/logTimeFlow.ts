@@ -1,12 +1,12 @@
 import { confirm, input, select } from "@inquirer/prompts";
-import { ClockifyApiError } from "../clockify/client.js";
-import { listProjects } from "../clockify/projects.js";
-import { createTimeEntry } from "../clockify/timeEntries.js";
-import { loadConfig, resolveApiKey } from "../config/store.js";
-import { todayDateString, formatLocalDateTime, toIsoUtc } from "../utils/datetime.js";
-import { parseDurationToMinutes, formatMinutes } from "../utils/duration.js";
-import { buildSchedule, validateDayWindow } from "../utils/schedule.js";
-import { runSetupWizard } from "./setupWizard.js";
+import { ClockifyApiError } from "@clockify/client";
+import { listProjects } from "@clockify/projects";
+import { createTimeEntry } from "@clockify/timeEntries";
+import { loadConfig, resolveApiKey } from "@config/store";
+import { todayDateString, formatLocalDateTime, toIsoUtc } from "@utils/datetime";
+import { parseDurationToMinutes, formatMinutes } from "@utils/duration";
+import { buildSchedule, validateDayWindow } from "@utils/schedule";
+import { runSetupWizard } from "@prompts/setupWizard";
 
 export interface LogFlowDeps {
   loadConfigFn?: typeof loadConfig;
@@ -33,7 +33,10 @@ async function collectTasks(
 
   while (true) {
     const description = await promptInputFn({
-      message: tasks.length === 0 ? "Describe a task you worked on:" : "Next task (leave blank to finish):",
+      message:
+        tasks.length === 0
+          ? "Describe a task you worked on:"
+          : "Next task (leave blank to finish):",
       validate: (value) => {
         if (tasks.length === 0 && !value.trim()) {
           return "At least one task is required.";
@@ -177,7 +180,7 @@ export async function runLogTimeFlow(
     projects = await listProjectsFn(apiKey, config.workspaceId);
   } catch (error) {
     if (error instanceof ClockifyApiError && error.status === 401) {
-      throw new Error("Authentication failed. Re-run `clockfycli setup`.");
+      throw new Error("Authentication failed. Re-run `clockfycli setup`.", { cause: error });
     }
     throw error;
   }

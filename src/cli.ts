@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { runLogTimeFlow } from "./prompts/logTimeFlow.js";
-import { runSetupWizard } from "./prompts/setupWizard.js";
+import { runLogTimeFlow } from "@prompts/logTimeFlow";
+import { runSetupWizard } from "@prompts/setupWizard";
 
 const program = new Command();
 

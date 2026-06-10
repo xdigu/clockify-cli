@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
-import { createTimeEntry } from "../src/clockify/timeEntries.js";
+import { createTimeEntry } from "../clockify/timeEntries";
 
 describe("createTimeEntry", () => {
   const originalFetch = global.fetch;

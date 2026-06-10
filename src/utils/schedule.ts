@@ -1,5 +1,5 @@
-import { addMinutes, combineDateAndTime, minutesBetween, parseTimeOfDay } from "./datetime.js";
-import { buildShortDescription } from "./keywords.js";
+import { addMinutes, combineDateAndTime, parseTimeOfDay } from "@utils/datetime";
+import { buildShortDescription } from "@utils/keywords";
 
 export interface ScheduleOptions {
   date: string;
@@ -53,11 +53,7 @@ function buildSlotsForBlock(
   }));
 }
 
-function scheduleSequential(
-  date: string,
-  startTime: string,
-  slots: Slot[],
-): PlannedEntry[] {
+function scheduleSequential(date: string, startTime: string, slots: Slot[]): PlannedEntry[] {
   let cursor = combineDateAndTime(date, startTime);
   const entries: PlannedEntry[] = [];
 
@@ -112,11 +108,15 @@ export function buildLunchSchedule(options: ScheduleOptions): PlannedEntry[] {
   const beforeMinutes = Math.round((options.totalMinutes * beforeWindow) / totalWindow);
   const afterMinutes = options.totalMinutes - beforeMinutes;
 
-  const beforeSlots = buildSlotsForBlock(options.tasks, beforeMinutes, (assignment) =>
-    assignment === "before" || assignment === "both",
+  const beforeSlots = buildSlotsForBlock(
+    options.tasks,
+    beforeMinutes,
+    (assignment) => assignment === "before" || assignment === "both",
   );
-  const afterSlots = buildSlotsForBlock(options.tasks, afterMinutes, (assignment) =>
-    assignment === "after" || assignment === "both",
+  const afterSlots = buildSlotsForBlock(
+    options.tasks,
+    afterMinutes,
+    (assignment) => assignment === "after" || assignment === "both",
   );
 
   return [
@@ -147,15 +147,18 @@ export function validateDayWindow(dayWindow: DayWindow): void {
   const lunchEnd = parseTimeOfDay(dayWindow.lunchEnd, "lunch end");
   const workEnd = parseTimeOfDay(dayWindow.workEnd, "work end");
 
-  const toMinutes = (value: { hours: number; minutes: number }) =>
-    value.hours * 60 + value.minutes;
+  const toMinutes = (value: { hours: number; minutes: number }) => value.hours * 60 + value.minutes;
 
   const start = toMinutes(workStart);
   const lunchStartMinutes = toMinutes(lunchStart);
   const lunchEndMinutes = toMinutes(lunchEnd);
   const end = toMinutes(workEnd);
 
-  if (!(start < lunchStartMinutes && lunchStartMinutes <= lunchEndMinutes && lunchEndMinutes < end)) {
-    throw new Error("Work and lunch times must follow workStart < lunchStart <= lunchEnd < workEnd.");
+  if (
+    !(start < lunchStartMinutes && lunchStartMinutes <= lunchEndMinutes && lunchEndMinutes < end)
+  ) {
+    throw new Error(
+      "Work and lunch times must follow workStart < lunchStart <= lunchEnd < workEnd.",
+    );
   }
 }

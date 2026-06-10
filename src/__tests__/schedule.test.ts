@@ -4,7 +4,7 @@ import {
   buildLunchSchedule,
   buildSchedule,
   validateDayWindow,
-} from "../src/utils/schedule.js";
+} from "../utils/schedule";
 
 describe("buildEqualSchedule", () => {
   it("splits total duration equally", () => {
@@ -224,24 +224,24 @@ describe("splitMinutes guardrails", () => {
   });
 });
 
-  it("skips zero-length slots when splitting odd minutes", () => {
-    const entries = buildLunchSchedule({
-      date: "2026-06-09",
-      totalMinutes: 1,
-      mode: "lunch",
-      tasks: [
-        { description: "Morning A", assignment: "before" },
-        { description: "Morning B", assignment: "before" },
-        { description: "Afternoon", assignment: "after" },
-      ],
-      dayWindow: {
-        workStart: "09:00",
-        lunchStart: "12:00",
-        lunchEnd: "13:00",
-        workEnd: "18:00",
-      },
-    });
-
-    expect(entries.length).toBeGreaterThan(0);
-    expect(entries.reduce((sum, entry) => sum + entry.durationMinutes, 0)).toBe(1);
+it("skips zero-length slots when splitting odd minutes", () => {
+  const entries = buildLunchSchedule({
+    date: "2026-06-09",
+    totalMinutes: 1,
+    mode: "lunch",
+    tasks: [
+      { description: "Morning A", assignment: "before" },
+      { description: "Morning B", assignment: "before" },
+      { description: "Afternoon", assignment: "after" },
+    ],
+    dayWindow: {
+      workStart: "09:00",
+      lunchStart: "12:00",
+      lunchEnd: "13:00",
+      workEnd: "18:00",
+    },
   });
+
+  expect(entries.length).toBeGreaterThan(0);
+  expect(entries.reduce((sum, entry) => sum + entry.durationMinutes, 0)).toBe(1);
+});

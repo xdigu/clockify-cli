@@ -7,7 +7,7 @@ import {
   parseTimeOfDay,
   todayDateString,
   toIsoUtc,
-} from "../src/utils/datetime.js";
+} from "../utils/datetime";
 
 describe("datetime utils", () => {
   it("parses time of day", () => {

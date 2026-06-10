@@ -4,19 +4,22 @@ module.exports = {
   testEnvironment: "node",
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@clockify/(.*)$": "<rootDir>/src/clockify/$1",
+    "^@config/(.*)$": "<rootDir>/src/config/$1",
+    "^@prompts/(.*)$": "<rootDir>/src/prompts/$1",
+    "^@utils/(.*)$": "<rootDir>/src/utils/$1",
   },
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
         useESM: true,
-        tsconfig: "tsconfig.test.json",
+        tsconfig: "tsconfig.json",
       },
     ],
   },
-  testMatch: ["**/tests/**/*.test.ts"],
-  collectCoverageFrom: ["src/**/*.ts", "!src/cli.ts"],
+  testMatch: ["**/__tests__/**/*.test.ts"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/cli.ts", "!src/__tests__/**"],
   coverageThreshold: {
     global: {
       branches: 89,

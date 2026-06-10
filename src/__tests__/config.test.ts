@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "@jest/globals";
-import { loadConfig, resolveApiKey, saveConfig } from "../src/config/store.js";
+import { loadConfig, resolveApiKey, saveConfig } from "../config/store";
 
 describe("config store", () => {
   let tempDir = "";

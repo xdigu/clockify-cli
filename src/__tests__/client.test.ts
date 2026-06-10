@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
-import { ClockifyApiError, clockifyRequest } from "../src/clockify/client.js";
+import { clockifyRequest } from "../clockify/client";
 
 describe("clockifyRequest", () => {
   const originalFetch = global.fetch;
@@ -29,7 +29,7 @@ describe("clockifyRequest", () => {
       name: "ClockifyApiError",
       status: 401,
       message: expect.stringContaining("clockfycli setup"),
-    } satisfies Partial<ClockifyApiError>);
+    });
   });
 
   it("handles empty responses", async () => {

@@ -1,26 +1,30 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "outDir": "dist",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "rootDir": "src",
+    "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "noEmit": true,
+    "isolatedModules": true,
     "declaration": true,
     "sourceMap": true,
-    "types": [
-      "node"
-    ]
+    "baseUrl": ".",
+    "types": ["node"],
+    "paths": {
+      "@clockify/*": ["./src/clockify/*"],
+      "@config/*": ["./src/config/*"],
+      "@prompts/*": ["./src/prompts/*"],
+      "@utils/*": ["./src/utils/*"]
+    }
   },
-  "include": [
-    "src/**/*",
-    "typings/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests"
-  ]
+  "include": ["src/**/*", "typings/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "src/__tests__"],
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "resolveFullExtension": ".js"
+  }
 }

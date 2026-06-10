@@ -1,7 +1,7 @@
 import { confirm, input, password, select } from "@inquirer/prompts";
-import { ClockifyApiError } from "../clockify/client.js";
-import { getCurrentUser, listWorkspaces } from "../clockify/user.js";
-import { loadConfig, saveConfig } from "../config/store.js";
+import { ClockifyApiError } from "@clockify/client";
+import { getCurrentUser, listWorkspaces } from "@clockify/user";
+import { loadConfig, saveConfig } from "@config/store";
 
 export interface SetupWizardDeps {
   loadConfigFn?: typeof loadConfig;
@@ -52,7 +52,9 @@ export async function runSetupWizard(
     workspaces = await listWorkspacesFn(apiKey.trim());
   } catch (error) {
     if (error instanceof ClockifyApiError && error.status === 401) {
-      throw new Error("Invalid API key. Generate one in Clockify Profile Settings.");
+      throw new Error("Invalid API key. Generate one in Clockify Profile Settings.", {
+        cause: error,
+      });
     }
     throw error;
   }

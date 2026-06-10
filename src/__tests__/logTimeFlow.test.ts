@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { runLogTimeFlow } from "../src/prompts/logTimeFlow.js";
+import { runLogTimeFlow } from "../prompts/logTimeFlow";
 
 describe("runLogTimeFlow", () => {
   it("creates entries after confirmation", async () => {
@@ -179,26 +179,27 @@ describe("runLogTimeFlow", () => {
   });
 
   it("validates duration and task prompts", async () => {
-    const promptInput = jest.fn().mockImplementation(async (config: {
-      message?: string;
-      validate?: (value: string) => true | string;
-    }) => {
-      if (config.message?.includes("How long")) {
-        expect(config.validate?.("bad")).toMatch(/Invalid duration/);
-        return "1h";
-      }
-      if (config.message?.includes("Describe a task")) {
-        expect(config.validate?.("")).toBe("At least one task is required.");
-        return "Task";
-      }
-      if (config.message?.includes("Next task")) {
-        return "";
-      }
-      if (config.message?.includes("Work start")) {
-        return "09:00";
-      }
-      return "";
-    });
+    const promptInput = jest
+      .fn()
+      .mockImplementation(
+        async (config: { message?: string; validate?: (value: string) => true | string }) => {
+          if (config.message?.includes("How long")) {
+            expect(config.validate?.("bad")).toMatch(/Invalid duration/);
+            return "1h";
+          }
+          if (config.message?.includes("Describe a task")) {
+            expect(config.validate?.("")).toBe("At least one task is required.");
+            return "Task";
+          }
+          if (config.message?.includes("Next task")) {
+            return "";
+          }
+          if (config.message?.includes("Work start")) {
+            return "09:00";
+          }
+          return "";
+        },
+      );
 
     await runLogTimeFlow(
       { date: "2026-06-09" },
@@ -216,7 +217,7 @@ describe("runLogTimeFlow", () => {
   });
 
   it("maps project listing auth failures", async () => {
-    const { ClockifyApiError } = await import("../src/clockify/client.js");
+    const { ClockifyApiError } = await import("../clockify/client");
 
     await expect(
       runLogTimeFlow(
@@ -337,25 +338,26 @@ describe("runLogTimeFlow", () => {
   });
 
   it("allows blank follow-up task prompts", async () => {
-    const promptInput = jest.fn().mockImplementation(async (config: {
-      message?: string;
-      validate?: (value: string) => true | string;
-    }) => {
-      if (config.message?.includes("Describe a task")) {
-        return "Task";
-      }
-      if (config.message?.includes("Next task")) {
-        expect(config.validate?.("")).toBe(true);
-        return "";
-      }
-      if (config.message?.includes("How long")) {
-        return "1h";
-      }
-      if (config.message?.includes("Work start")) {
-        return "09:00";
-      }
-      return "";
-    });
+    const promptInput = jest
+      .fn()
+      .mockImplementation(
+        async (config: { message?: string; validate?: (value: string) => true | string }) => {
+          if (config.message?.includes("Describe a task")) {
+            return "Task";
+          }
+          if (config.message?.includes("Next task")) {
+            expect(config.validate?.("")).toBe(true);
+            return "";
+          }
+          if (config.message?.includes("How long")) {
+            return "1h";
+          }
+          if (config.message?.includes("Work start")) {
+            return "09:00";
+          }
+          return "";
+        },
+      );
 
     await runLogTimeFlow(
       { date: "2026-06-09" },
@@ -371,5 +373,4 @@ describe("runLogTimeFlow", () => {
       },
     );
   });
-
 });
