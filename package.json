@@ -1,14 +1,14 @@
 {
-  "name": "clockfycli",
+  "name": "clockfy-cli",
   "version": "0.1.0",
   "description": "Interactive CLI to log time entries to Clockify",
   "type": "module",
   "bin": {
-    "clockfycli": "./dist/cli.js"
+    "clockfy-cli": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit false && tsc-alias -p tsconfig.json",
-    "clockfycli": "tsx src/cli.ts",
+    "clockfy-cli": "tsx src/cli.ts",
     "dev": "tsx src/cli.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",

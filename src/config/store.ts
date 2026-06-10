@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 export function getConfigDir(): string {
-  return process.env.CLOCKIFY_CONFIG_DIR ?? join(homedir(), ".config", "clockfycli");
+  return process.env.CLOCKIFY_CONFIG_DIR ?? join(homedir(), ".config", "clockfy-cli");
 }
 
 export function getConfigPath(): string {

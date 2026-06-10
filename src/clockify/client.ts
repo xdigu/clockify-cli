@@ -40,7 +40,7 @@ export async function clockifyRequest<T>(
 
     const message =
       response.status === 401
-        ? "Clockify authentication failed. Re-run `clockfycli setup` with a valid API key."
+        ? "Clockify authentication failed. Re-run `clockfy-cli setup` with a valid API key."
         : `Clockify API request failed (${response.status})`;
 
     throw new ClockifyApiError(message, response.status, body);

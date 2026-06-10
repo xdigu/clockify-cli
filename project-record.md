@@ -1,4 +1,4 @@
-# Project Record — clockfycli
+# Project Record — clockfy-cli
 
 Central record of decisions, action items, and roadmap for the Clockify time-tracking CLI. Updated as the project evolves.
 
@@ -6,9 +6,9 @@ Central record of decisions, action items, and roadmap for the Clockify time-tra
 
 ## Project overview
 
-**clockfycli** is an interactive Node.js CLI that helps log daily work to [Clockify](https://clockify.me) through guided prompts: total duration, tasks performed, time-split strategy, project association, and auto-generated short descriptions.
+**clockfy-cli** is an interactive Node.js CLI that helps log daily work to [Clockify](https://clockify.me) through guided prompts: total duration, tasks performed, time-split strategy, project association, and auto-generated short descriptions.
 
-**Repository:** `/private/var/www/github/xdigu/clockfycli` (greenfield)
+**Repository:** `/private/var/www/github/xdigu/clockfy-cli` (greenfield)
 
 ---
 
@@ -33,7 +33,7 @@ Central record of decisions, action items, and roadmap for the Clockify time-tra
 | ------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------- | ---------- |
 | Clockify auth model | Static API key via `X-Api-Key` header                           | Clockify public API does **not** support OAuth or refresh tokens | 2026-06-09 |
 | First-run setup     | Interactive wizard: paste API key + pick workspace              | User preference                                                  | 2026-06-09 |
-| Config location     | `~/.config/clockfycli/config.json` (mode `0600`)                | Standard XDG-style path, restrictive permissions                 | 2026-06-09 |
+| Config location     | `~/.config/clockfy-cli/config.json` (mode `0600`)                | Standard XDG-style path, restrictive permissions                 | 2026-06-09 |
 | Config fields       | `apiKey`, `workspaceId`, `workspaceName`, optional day defaults | Supports setup + sensible lunch/work defaults                    | 2026-06-09 |
 | Env override        | `CLOCKIFY_API_KEY` for CI/testing                               | Keeps secrets out of test fixtures                               | 2026-06-09 |
 | API base URL        | `https://api.clockify.me/api/v1`                                | Official Clockify REST API                                       | 2026-06-09 |
@@ -72,11 +72,11 @@ _Jest migration complete. 65 tests passing. Remaining v1 work: README, conventio
 
 ### Pending (v1 implementation order)
 
-1. **Scaffold** — ✅ Node.js ESM + TypeScript with Yarn, Commander, Jest + ts-jest, bin entry `clockfycli`
-2. **Config & setup** — Config store + interactive `clockfycli setup` wizard (API key + workspace)
+1. **Scaffold** — ✅ Node.js ESM + TypeScript with Yarn, Commander, Jest + ts-jest, bin entry `clockfy-cli`
+2. **Config & setup** — Config store + interactive `clockfy-cli setup` wizard (API key + workspace)
 3. **Clockify client** — HTTP wrapper; user, workspaces, projects, create time entry
 4. **Time utilities** — Duration parser, lunch/equal schedule builder, keyword short-name generator + unit tests
-5. **Log command** — Full interactive `clockfycli log` flow: tasks → split mode → project picker → preview → submit
+5. **Log command** — Full interactive `clockfy-cli log` flow: tasks → split mode → project picker → preview → submit
 6. **Docs & quality** — README, `.cursor/rules/project-runtime-conventions.mdc`, 95% coverage in yarn scripts
 
 ### Completed
@@ -95,8 +95,8 @@ _Jest migration complete. 65 tests passing. Remaining v1 work: README, conventio
 
 ### v1 — Interactive daily logger (current target)
 
-- `yarn clockfycli setup` — one-time API key and workspace configuration
-- `yarn clockfycli log` — guided time entry creation
+- `yarn clockfy-cli setup` — one-time API key and workspace configuration
+- `yarn clockfy-cli log` — guided time entry creation
 - Equal or lunch-based time splitting
 - Project picker from live Clockify project list
 - Keyword-based entry descriptions

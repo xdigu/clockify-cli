@@ -101,7 +101,7 @@ export async function runLogTimeFlow(
 
   const apiKey = resolveApiKeyFn(config);
   if (!apiKey) {
-    throw new Error("Missing API key. Run `clockfycli setup`.");
+    throw new Error("Missing API key. Run `clockfy-cli setup`.");
   }
 
   const date =
@@ -180,7 +180,7 @@ export async function runLogTimeFlow(
     projects = await listProjectsFn(apiKey, config.workspaceId);
   } catch (error) {
     if (error instanceof ClockifyApiError && error.status === 401) {
-      throw new Error("Authentication failed. Re-run `clockfycli setup`.", { cause: error });
+      throw new Error("Authentication failed. Re-run `clockfy-cli setup`.", { cause: error });
     }
     throw error;
   }
