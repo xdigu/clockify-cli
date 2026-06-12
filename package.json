@@ -4,7 +4,8 @@
   "description": "Interactive CLI to log time entries to Clockify",
   "type": "module",
   "bin": {
-    "clockify-cli": "./dist/cli.js"
+    "clockify-cli": "./dist/cli.js",
+    "clockify": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit false && tsc-alias -p tsconfig.json",
