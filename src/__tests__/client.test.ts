@@ -28,7 +28,7 @@ describe("clockifyRequest", () => {
     await expect(clockifyRequest("bad-key", "/user")).rejects.toMatchObject({
       name: "ClockifyApiError",
       status: 401,
-      message: expect.stringContaining("clockfy-cli setup"),
+      message: expect.stringContaining("clockify-cli setup"),
     });
   });
 

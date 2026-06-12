@@ -50,11 +50,9 @@ interface ClockifyTimeEntry {
   projectId?: string;
 }
 
-type LunchAssignment = "before" | "after" | "both";
-
 interface TaskInput {
   description: string;
-  assignment?: LunchAssignment;
+  durationMinutes?: number;
 }
 
 interface PlannedEntry {

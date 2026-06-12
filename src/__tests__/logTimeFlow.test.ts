@@ -1,6 +1,16 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { runLogTimeFlow } from "../prompts/logTimeFlow";
 
+const baseConfig = {
+  apiKey: "key",
+  workspaceId: "ws-1",
+  workspaceName: "Main",
+  workStart: "09:00",
+  lunchStart: "12:00",
+  lunchEnd: "13:00",
+  workEnd: "18:00",
+};
+
 describe("runLogTimeFlow", () => {
   it("creates entries after confirmation", async () => {
     const logs: unknown[][] = [];
@@ -9,26 +19,12 @@ describe("runLogTimeFlow", () => {
     await runLogTimeFlow(
       { date: "2026-06-09", useLastProject: true },
       {
-        loadConfigFn: async () => ({
-          apiKey: "key",
-          workspaceId: "ws-1",
-          workspaceName: "Main",
-          workStart: "09:00",
-        }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn,
-        runSetupWizardFn: async () => ({
-          apiKey: "key",
-          workspaceId: "ws-1",
-          workspaceName: "Main",
-        }),
-        promptInput: jest
-          .fn()
-          .mockResolvedValueOnce("8h")
-          .mockResolvedValueOnce("Task one")
-          .mockResolvedValueOnce("")
-          .mockResolvedValueOnce("09:00"),
+        runSetupWizardFn: async () => baseConfig,
+        promptInput: jest.fn().mockResolvedValueOnce("Task one").mockResolvedValueOnce("2h"),
         promptSelect: jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce("p1"),
         promptConfirm: jest.fn().mockResolvedValue(true),
         log: (...args: unknown[]) => {
@@ -38,11 +34,8 @@ describe("runLogTimeFlow", () => {
     );
 
     expect(createTimeEntryFn).toHaveBeenCalledTimes(1);
-    expect(createTimeEntryFn.mock.calls[0]?.[2]).toMatchObject({
-      description: expect.any(String),
-      projectId: "p1",
-    });
     expect(logs.flat().join(" ")).toContain("Created entry entry-1");
+    expect(logs.flat().join(" ")).toContain("clockify-cli setup");
   });
 
   it("cancels when confirmation is declined", async () => {
@@ -51,20 +44,11 @@ describe("runLogTimeFlow", () => {
     await runLogTimeFlow(
       { date: "2026-06-09" },
       {
-        loadConfigFn: async () => ({
-          apiKey: "key",
-          workspaceId: "ws-1",
-          workspaceName: "Main",
-        }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn,
-        promptInput: jest
-          .fn()
-          .mockResolvedValueOnce("1h")
-          .mockResolvedValueOnce("Only task")
-          .mockResolvedValueOnce("")
-          .mockResolvedValueOnce("09:00"),
+        promptInput: jest.fn().mockResolvedValueOnce("Only task").mockResolvedValueOnce("1h"),
         promptSelect: jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce("p1"),
         promptConfirm: jest.fn().mockResolvedValue(false),
         log: jest.fn(),
@@ -73,12 +57,9 @@ describe("runLogTimeFlow", () => {
 
     expect(createTimeEntryFn).not.toHaveBeenCalled();
   });
+
   it("runs setup when config is missing", async () => {
-    const runSetupWizardFn = jest.fn().mockResolvedValue({
-      apiKey: "key",
-      workspaceId: "ws-1",
-      workspaceName: "Main",
-    });
+    const runSetupWizardFn = jest.fn().mockResolvedValue(baseConfig);
 
     await runLogTimeFlow(
       { date: "2026-06-09" },
@@ -88,12 +69,7 @@ describe("runLogTimeFlow", () => {
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn: jest.fn().mockResolvedValue({ id: "entry-1" }),
-        promptInput: jest
-          .fn()
-          .mockResolvedValueOnce("1h")
-          .mockResolvedValueOnce("Only task")
-          .mockResolvedValueOnce("")
-          .mockResolvedValueOnce("09:00"),
+        promptInput: jest.fn().mockResolvedValueOnce("Only task").mockResolvedValueOnce("1h"),
         promptSelect: jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce("p1"),
         promptConfirm: jest.fn().mockResolvedValue(false),
         log: jest.fn(),
@@ -103,47 +79,59 @@ describe("runLogTimeFlow", () => {
     expect(runSetupWizardFn).toHaveBeenCalledWith(true);
   });
 
-  it("supports lunch split mode", async () => {
+  it("combines all task names into before and after lunch entries", async () => {
     const createTimeEntryFn = jest.fn().mockResolvedValue({ id: "entry-1" });
 
     await runLogTimeFlow(
       { date: "2026-06-09" },
       {
-        loadConfigFn: async () => ({
-          apiKey: "key",
-          workspaceId: "ws-1",
-          workspaceName: "Main",
-          workStart: "09:00",
-          lunchStart: "12:00",
-          lunchEnd: "13:00",
-          workEnd: "18:00",
-        }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn,
         promptInput: jest
           .fn()
-          .mockResolvedValueOnce("2h")
-          .mockResolvedValueOnce("Morning only")
-          .mockResolvedValueOnce("Afternoon only")
-          .mockResolvedValueOnce("")
-          .mockResolvedValueOnce("09:00")
-          .mockResolvedValueOnce("12:00")
-          .mockResolvedValueOnce("13:00")
-          .mockResolvedValueOnce("18:00"),
-        promptSelect: jest
-          .fn()
-          .mockResolvedValueOnce("lunch")
-          .mockResolvedValueOnce("before")
-          .mockResolvedValueOnce("after")
-          .mockResolvedValueOnce("p1")
-          .mockResolvedValueOnce("p1"),
+          .mockResolvedValueOnce("Morning only; Afternoon only")
+          .mockResolvedValueOnce("2h"),
+        promptSelect: jest.fn().mockResolvedValueOnce("lunch").mockResolvedValueOnce("p1"),
         promptConfirm: jest.fn().mockResolvedValue(true),
         log: jest.fn(),
       },
     );
 
     expect(createTimeEntryFn).toHaveBeenCalledTimes(2);
+    expect(createTimeEntryFn.mock.calls[0]?.[2]?.description).toContain("Morning");
+    expect(createTimeEntryFn.mock.calls[0]?.[2]?.description).toContain("Afternoon");
+    expect(createTimeEntryFn.mock.calls[1]?.[2]?.description).toBe(
+      createTimeEntryFn.mock.calls[0]?.[2]?.description,
+    );
+  });
+
+  it("supports lunch split mode using setup schedule defaults", async () => {
+    const createTimeEntryFn = jest.fn().mockResolvedValue({ id: "entry-1" });
+    const promptInput = jest
+      .fn()
+      .mockResolvedValueOnce("Morning only; Afternoon only")
+      .mockResolvedValueOnce("2h");
+
+    await runLogTimeFlow(
+      { date: "2026-06-09" },
+      {
+        loadConfigFn: async () => baseConfig,
+        resolveApiKeyFn: () => "key",
+        listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+        createTimeEntryFn,
+        promptInput,
+        promptSelect: jest.fn().mockResolvedValueOnce("lunch").mockResolvedValueOnce("p1"),
+        promptConfirm: jest.fn().mockResolvedValue(true),
+        log: jest.fn(),
+      },
+    );
+
+    expect(createTimeEntryFn).toHaveBeenCalledTimes(2);
+    expect(promptInput.mock.calls.some((call) => call[0]?.message?.includes("Work start"))).toBe(
+      false,
+    );
   });
 
   it("throws when api key is missing", async () => {
@@ -163,15 +151,10 @@ describe("runLogTimeFlow", () => {
       runLogTimeFlow(
         { date: "2026-06-09" },
         {
-          loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+          loadConfigFn: async () => baseConfig,
           resolveApiKeyFn: () => "key",
           listProjectsFn: async () => [],
-          promptInput: jest
-            .fn()
-            .mockResolvedValueOnce("1h")
-            .mockResolvedValueOnce("Task")
-            .mockResolvedValueOnce("")
-            .mockResolvedValueOnce("09:00"),
+          promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("1h"),
           promptSelect: jest.fn().mockResolvedValueOnce("equal"),
         },
       ),
@@ -183,19 +166,15 @@ describe("runLogTimeFlow", () => {
       .fn()
       .mockImplementation(
         async (config: { message?: string; validate?: (value: string) => true | string }) => {
-          if (config.message?.includes("How long")) {
-            expect(config.validate?.("bad")).toMatch(/Invalid duration/);
-            return "1h";
-          }
-          if (config.message?.includes("Describe a task")) {
+          if (config.message?.includes("Describe tasks")) {
             expect(config.validate?.("")).toBe("At least one task is required.");
+            expect(config.validate?.("   ")).toBe("At least one task is required.");
+            expect(config.validate?.("Task A; Task B")).toBe(true);
             return "Task";
           }
-          if (config.message?.includes("Next task")) {
-            return "";
-          }
-          if (config.message?.includes("Work start")) {
-            return "09:00";
+          if (config.message?.includes("How long did you work on")) {
+            expect(config.validate?.("bad")).toMatch(/Invalid duration/);
+            return "1h";
           }
           return "";
         },
@@ -204,7 +183,7 @@ describe("runLogTimeFlow", () => {
     await runLogTimeFlow(
       { date: "2026-06-09" },
       {
-        loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn: jest.fn(),
@@ -223,35 +202,29 @@ describe("runLogTimeFlow", () => {
       runLogTimeFlow(
         { date: "2026-06-09" },
         {
-          loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+          loadConfigFn: async () => baseConfig,
           resolveApiKeyFn: () => "key",
           listProjectsFn: async () => {
             throw new ClockifyApiError("Unauthorized", 401);
           },
-          promptInput: jest
-            .fn()
-            .mockResolvedValueOnce("1h")
-            .mockResolvedValueOnce("Task")
-            .mockResolvedValueOnce("")
-            .mockResolvedValueOnce("09:00"),
+          promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("1h"),
           promptSelect: jest.fn().mockResolvedValueOnce("equal"),
         },
       ),
     ).rejects.toThrow(/Authentication failed/);
   });
+
   it("prompts for date when not provided", async () => {
     const promptInput = jest
       .fn()
       .mockResolvedValueOnce("2026-06-09")
-      .mockResolvedValueOnce("1h")
       .mockResolvedValueOnce("Task")
-      .mockResolvedValueOnce("")
-      .mockResolvedValueOnce("09:00");
+      .mockResolvedValueOnce("1h");
 
     await runLogTimeFlow(
       {},
       {
-        loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn: jest.fn(),
@@ -271,18 +244,13 @@ describe("runLogTimeFlow", () => {
     await runLogTimeFlow(
       { date: "2026-06-09" },
       {
-        loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [
           { id: "p1", name: "Project One", clientName: "Acme", archived: false },
         ],
         createTimeEntryFn: jest.fn(),
-        promptInput: jest
-          .fn()
-          .mockResolvedValueOnce("1h")
-          .mockResolvedValueOnce("Task")
-          .mockResolvedValueOnce("")
-          .mockResolvedValueOnce("09:00"),
+        promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("1h"),
         promptSelect: jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce("p1"),
         promptConfirm: jest.fn().mockResolvedValue(false),
         log: (...args: unknown[]) => logs.push(args),
@@ -297,17 +265,12 @@ describe("runLogTimeFlow", () => {
       runLogTimeFlow(
         { date: "2026-06-09" },
         {
-          loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+          loadConfigFn: async () => baseConfig,
           resolveApiKeyFn: () => "key",
           listProjectsFn: async () => {
             throw new Error("network down");
           },
-          promptInput: jest
-            .fn()
-            .mockResolvedValueOnce("1h")
-            .mockResolvedValueOnce("Task")
-            .mockResolvedValueOnce("")
-            .mockResolvedValueOnce("09:00"),
+          promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("1h"),
           promptSelect: jest.fn().mockResolvedValueOnce("equal"),
         },
       ),
@@ -319,16 +282,11 @@ describe("runLogTimeFlow", () => {
       runLogTimeFlow(
         { date: "2026-06-09" },
         {
-          loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+          loadConfigFn: async () => baseConfig,
           resolveApiKeyFn: () => "key",
           listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
           createTimeEntryFn: jest.fn(),
-          promptInput: jest
-            .fn()
-            .mockResolvedValueOnce("1h")
-            .mockResolvedValueOnce("Task")
-            .mockResolvedValueOnce("")
-            .mockResolvedValueOnce("09:00"),
+          promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("1h"),
           promptSelect: jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce(undefined),
           promptConfirm: jest.fn().mockResolvedValue(true),
           log: jest.fn(),
@@ -337,23 +295,18 @@ describe("runLogTimeFlow", () => {
     ).rejects.toThrow(/Each entry must have a project/);
   });
 
-  it("allows blank follow-up task prompts", async () => {
+  it("validates lunch mode total duration", async () => {
     const promptInput = jest
       .fn()
       .mockImplementation(
         async (config: { message?: string; validate?: (value: string) => true | string }) => {
-          if (config.message?.includes("Describe a task")) {
+          if (config.message?.includes("Describe tasks")) {
             return "Task";
           }
-          if (config.message?.includes("Next task")) {
-            expect(config.validate?.("")).toBe(true);
-            return "";
-          }
-          if (config.message?.includes("How long")) {
-            return "1h";
-          }
-          if (config.message?.includes("Work start")) {
-            return "09:00";
+          if (config.message?.includes("How long did you work in total")) {
+            expect(config.validate?.("bad")).toMatch(/Invalid duration/);
+            expect(config.validate?.("0h")).toBe("Duration must be greater than zero.");
+            return "2h";
           }
           return "";
         },
@@ -362,7 +315,58 @@ describe("runLogTimeFlow", () => {
     await runLogTimeFlow(
       { date: "2026-06-09" },
       {
-        loadConfigFn: async () => ({ apiKey: "key", workspaceId: "ws-1", workspaceName: "Main" }),
+        loadConfigFn: async () => baseConfig,
+        resolveApiKeyFn: () => "key",
+        listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+        createTimeEntryFn: jest.fn(),
+        promptInput,
+        promptSelect: jest.fn().mockResolvedValueOnce("lunch").mockResolvedValueOnce("p1"),
+        promptConfirm: jest.fn().mockResolvedValue(false),
+        log: jest.fn(),
+      },
+    );
+  });
+
+  it("rejects invalid lunch schedule from setup config", async () => {
+    await expect(
+      runLogTimeFlow(
+        { date: "2026-06-09" },
+        {
+          loadConfigFn: async () => ({
+            ...baseConfig,
+            lunchStart: "13:00",
+            lunchEnd: "12:00",
+          }),
+          resolveApiKeyFn: () => "key",
+          listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+          promptInput: jest.fn().mockResolvedValueOnce("Task").mockResolvedValueOnce("2h"),
+          promptSelect: jest.fn().mockResolvedValueOnce("lunch"),
+          log: jest.fn(),
+        },
+      ),
+    ).rejects.toThrow(/must follow/);
+  });
+
+  it("rejects zero duration for individual tasks", async () => {
+    const promptInput = jest
+      .fn()
+      .mockImplementation(
+        async (config: { message?: string; validate?: (value: string) => true | string }) => {
+          if (config.message?.includes("Describe tasks")) {
+            return "Task";
+          }
+          if (config.message?.includes("How long did you work on")) {
+            expect(config.validate?.("0")).toBe("Duration must be greater than zero.");
+            return "1h";
+          }
+          return "";
+        },
+      );
+
+    await runLogTimeFlow(
+      { date: "2026-06-09" },
+      {
+        loadConfigFn: async () => baseConfig,
         resolveApiKeyFn: () => "key",
         listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
         createTimeEntryFn: jest.fn(),
@@ -372,5 +376,99 @@ describe("runLogTimeFlow", () => {
         log: jest.fn(),
       },
     );
+  });
+
+  it("schedules per-task durations across lunch using setup defaults", async () => {
+    const createTimeEntryFn = jest.fn().mockResolvedValue({ id: "entry-1" });
+
+    await runLogTimeFlow(
+      { date: "2026-06-09" },
+      {
+        loadConfigFn: async () => baseConfig,
+        resolveApiKeyFn: () => "key",
+        listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+        createTimeEntryFn,
+        promptInput: jest
+          .fn()
+          .mockResolvedValueOnce("Morning work; Afternoon work")
+          .mockResolvedValueOnce("3h")
+          .mockResolvedValueOnce("1h"),
+        promptSelect: jest
+          .fn()
+          .mockResolvedValueOnce("equal")
+          .mockResolvedValueOnce("p1")
+          .mockResolvedValueOnce("p1"),
+        promptConfirm: jest.fn().mockResolvedValue(true),
+        log: jest.fn(),
+      },
+    );
+
+    expect(createTimeEntryFn).toHaveBeenCalledTimes(2);
+    const firstStart = new Date(createTimeEntryFn.mock.calls[0]?.[2]?.start as string);
+    const secondStart = new Date(createTimeEntryFn.mock.calls[1]?.[2]?.start as string);
+    expect(firstStart.getHours()).toBe(9);
+    expect(secondStart.getHours()).toBe(13);
+  });
+
+  it("asks for project once when a task is split across lunch", async () => {
+    const promptSelect = jest.fn().mockResolvedValueOnce("equal").mockResolvedValueOnce("p1");
+
+    const createTimeEntryFn = jest.fn().mockResolvedValue({ id: "entry-1" });
+
+    await runLogTimeFlow(
+      { date: "2026-06-09" },
+      {
+        loadConfigFn: async () => ({
+          ...baseConfig,
+          workStart: "08:00",
+          lunchStart: "12:30",
+          lunchEnd: "13:30",
+          workEnd: "17:00",
+        }),
+        resolveApiKeyFn: () => "key",
+        listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+        createTimeEntryFn,
+        promptInput: jest.fn().mockResolvedValueOnce("Long task").mockResolvedValueOnce("5h"),
+        promptSelect,
+        promptConfirm: jest.fn().mockResolvedValue(true),
+        log: jest.fn(),
+      },
+    );
+
+    const projectPrompts = promptSelect.mock.calls.filter((call) =>
+      call[0]?.message?.includes("Project for"),
+    );
+    expect(projectPrompts).toHaveLength(1);
+    expect(createTimeEntryFn).toHaveBeenCalledTimes(2);
+    expect(createTimeEntryFn.mock.calls[0]?.[2]?.projectId).toBe("p1");
+    expect(createTimeEntryFn.mock.calls[1]?.[2]?.projectId).toBe("p1");
+  });
+
+  it("parses semicolon-separated tasks", async () => {
+    const createTimeEntryFn = jest.fn().mockResolvedValue({ id: "entry-1" });
+
+    await runLogTimeFlow(
+      { date: "2026-06-09" },
+      {
+        loadConfigFn: async () => baseConfig,
+        resolveApiKeyFn: () => "key",
+        listProjectsFn: async () => [{ id: "p1", name: "Project One", archived: false }],
+        createTimeEntryFn,
+        promptInput: jest
+          .fn()
+          .mockResolvedValueOnce("Task A; Task B")
+          .mockResolvedValueOnce("1h")
+          .mockResolvedValueOnce("2h"),
+        promptSelect: jest
+          .fn()
+          .mockResolvedValueOnce("equal")
+          .mockResolvedValueOnce("p1")
+          .mockResolvedValueOnce("p1"),
+        promptConfirm: jest.fn().mockResolvedValue(true),
+        log: jest.fn(),
+      },
+    );
+
+    expect(createTimeEntryFn).toHaveBeenCalledTimes(2);
   });
 });

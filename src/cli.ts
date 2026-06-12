@@ -6,7 +6,7 @@ import { runSetupWizard } from "@prompts/setupWizard";
 const program = new Command();
 
 program
-  .name("clockfy-cli")
+  .name("clockify-cli")
   .description("Interactive CLI to log time entries to Clockify")
   .version("0.1.0");
 

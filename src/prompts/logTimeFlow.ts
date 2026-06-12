@@ -24,42 +24,61 @@ function projectLabel(project: ClockifyProject): string {
   return project.clientName ? `${project.name} (${project.clientName})` : project.name;
 }
 
+const SCHEDULE_HINT =
+  "Work and lunch times use your setup defaults. Run `clockify-cli setup` to change them.";
+
+function dayWindowFromConfig(config: AppConfig): DayWindow {
+  return {
+    workStart: config.workStart ?? "09:00",
+    lunchStart: config.lunchStart ?? "12:00",
+    lunchEnd: config.lunchEnd ?? "13:00",
+    workEnd: config.workEnd ?? "18:00",
+  };
+}
+
+function parseTasksInput(raw: string): string[] {
+  return raw
+    .split(";")
+    .map((task) => task.trim())
+    .filter(Boolean);
+}
+
 async function collectTasks(
   promptInputFn: typeof input,
-  promptSelectFn: typeof select,
   mode: "equal" | "lunch",
 ): Promise<TaskInput[]> {
+  const tasksInput = await promptInputFn({
+    message: "Describe tasks you worked on (separate with ;):",
+    validate: (value) => {
+      if (!parseTasksInput(value).length) {
+        return "At least one task is required.";
+      }
+      return true;
+    },
+  });
+
+  const descriptions = parseTasksInput(tasksInput);
   const tasks: TaskInput[] = [];
 
-  while (true) {
-    const description = await promptInputFn({
-      message:
-        tasks.length === 0
-          ? "Describe a task you worked on:"
-          : "Next task (leave blank to finish):",
-      validate: (value) => {
-        if (tasks.length === 0 && !value.trim()) {
-          return "At least one task is required.";
-        }
-        return true;
-      },
-    });
+  for (const description of descriptions) {
+    const task: TaskInput = { description };
 
-    if (!description.trim()) {
-      break;
-    }
-
-    const task: TaskInput = { description: description.trim() };
-
-    if (mode === "lunch") {
-      task.assignment = await promptSelectFn<LunchAssignment>({
-        message: `When did you work on "${task.description}"?`,
-        choices: [
-          { name: "Before lunch", value: "before" },
-          { name: "After lunch", value: "after" },
-          { name: "Both (before and after)", value: "both" },
-        ],
+    if (mode === "equal") {
+      const durationInput = await promptInputFn({
+        message: `How long did you work on "${description}"? (e.g. 2h, 1h30m, 2):`,
+        validate: (value) => {
+          try {
+            const minutes = parseDurationToMinutes(value);
+            if (minutes <= 0) {
+              return "Duration must be greater than zero.";
+            }
+            return true;
+          } catch (error) {
+            return (error as Error).message;
+          }
+        },
       });
+      task.durationMinutes = parseDurationToMinutes(durationInput);
     }
 
     tasks.push(task);
@@ -101,8 +120,10 @@ export async function runLogTimeFlow(
 
   const apiKey = resolveApiKeyFn(config);
   if (!apiKey) {
-    throw new Error("Missing API key. Run `clockfy-cli setup`.");
+    throw new Error("Missing API key. Run `clockify-cli setup`.");
   }
+
+  logFn(SCHEDULE_HINT);
 
   const date =
     options.date ??
@@ -111,67 +132,47 @@ export async function runLogTimeFlow(
       default: todayDateString(),
     }));
 
-  const durationInput = await promptInputFn({
-    message: "How long did you work in total? (e.g. 8h, 7h30m, 7.5):",
-    validate: (value) => {
-      try {
-        parseDurationToMinutes(value);
-        return true;
-      } catch (error) {
-        return error instanceof Error ? error.message : "Invalid duration.";
-      }
-    },
-  });
-
-  const totalMinutes = parseDurationToMinutes(durationInput);
-
   const splitMode = await promptSelectFn<"equal" | "lunch">({
     message: "How should time be split across tasks?",
     choices: [
-      { name: "Share equally across all tasks", value: "equal" },
-      { name: "Split before and after lunch", value: "lunch" },
+      { name: "Set duration for each task", value: "equal" },
+      {
+        name: "Split before and after lunch (one entry per block, all task names)",
+        value: "lunch",
+      },
     ],
   });
 
-  const tasks = await collectTasks(promptInputFn, promptSelectFn, splitMode);
+  const tasks = await collectTasks(promptInputFn, splitMode);
 
-  let dayWindow;
+  const dayWindow = dayWindowFromConfig(config);
+  validateDayWindow(dayWindow);
+
+  let totalMinutes: number | undefined;
   if (splitMode === "lunch") {
-    dayWindow = {
-      workStart: await promptInputFn({
-        message: "Work start (HH:MM):",
-        default: config.workStart ?? "09:00",
-      }),
-      lunchStart: await promptInputFn({
-        message: "Lunch start (HH:MM):",
-        default: config.lunchStart ?? "12:00",
-      }),
-      lunchEnd: await promptInputFn({
-        message: "Lunch end (HH:MM):",
-        default: config.lunchEnd ?? "13:00",
-      }),
-      workEnd: await promptInputFn({
-        message: "Work end (HH:MM):",
-        default: config.workEnd ?? "18:00",
-      }),
-    };
-    validateDayWindow(dayWindow);
+    const durationInput = await promptInputFn({
+      message: "How long did you work in total? (e.g. 8h, 7h30m, 8):",
+      validate: (value) => {
+        try {
+          const minutes = parseDurationToMinutes(value);
+          if (minutes <= 0) {
+            return "Duration must be greater than zero.";
+          }
+          return true;
+        } catch (error) {
+          return (error as Error).message;
+        }
+      },
+    });
+    totalMinutes = parseDurationToMinutes(durationInput);
   }
-
-  const workStart =
-    splitMode === "equal"
-      ? await promptInputFn({
-          message: "Work start (HH:MM):",
-          default: config.workStart ?? "09:00",
-        })
-      : dayWindow!.workStart;
 
   const plannedEntries = buildSchedule({
     date,
     totalMinutes,
     tasks,
     mode: splitMode,
-    workStart,
+    workStart: dayWindow.workStart,
     dayWindow,
   });
 
@@ -180,7 +181,7 @@ export async function runLogTimeFlow(
     projects = await listProjectsFn(apiKey, config.workspaceId);
   } catch (error) {
     if (error instanceof ClockifyApiError && error.status === 401) {
-      throw new Error("Authentication failed. Re-run `clockfy-cli setup`.", { cause: error });
+      throw new Error("Authentication failed. Re-run `clockify-cli setup`.", { cause: error });
     }
     throw error;
   }
@@ -190,24 +191,34 @@ export async function runLogTimeFlow(
   }
 
   let lastProjectId: string | undefined;
+  let lastTaskDescription: string | undefined;
 
   for (const entry of plannedEntries) {
-    const defaultProjectId = options.useLastProject ? lastProjectId : undefined;
-    const choices = projects.map((project) => ({
-      name: projectLabel(project),
-      value: project.id,
-    }));
+    const isSameTaskContinuation =
+      lastTaskDescription !== undefined && entry.taskDescription === lastTaskDescription;
 
-    const projectId = await promptSelectFn({
-      message: `Project for "${entry.shortDescription}":`,
-      choices,
-      default: defaultProjectId,
-    });
+    let projectId: string | undefined;
+    if (isSameTaskContinuation && lastProjectId) {
+      projectId = lastProjectId;
+    } else {
+      const defaultProjectId = options.useLastProject ? lastProjectId : undefined;
+      const choices = projects.map((project) => ({
+        name: projectLabel(project),
+        value: project.id,
+      }));
+
+      projectId = await promptSelectFn({
+        message: `Project for "${entry.shortDescription}":`,
+        choices,
+        default: defaultProjectId,
+      });
+    }
 
     const project = projects.find((item) => item.id === projectId);
     entry.projectId = projectId;
     entry.projectName = project ? projectLabel(project) : projectId;
     lastProjectId = projectId;
+    lastTaskDescription = entry.taskDescription;
   }
 
   printPreview(plannedEntries, logFn);

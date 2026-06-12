@@ -21,9 +21,9 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# Local Clockify CLI config (optional: user config lives in ~/.config/clockfy-cli)
-.clockfycli/
-.clockfy-cli/
+# Local Clockify CLI config (optional: user config lives in ~/.config/clockify-cli)
+.clockifycli/
+.clockify-cli/
 config.local.json
 
 # Yarn

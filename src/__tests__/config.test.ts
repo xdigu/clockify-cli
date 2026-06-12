@@ -23,7 +23,7 @@ describe("config store", () => {
   });
 
   it("saves and loads config", async () => {
-    tempDir = await mkdtemp(join(tmpdir(), "clockfy-cli-"));
+    tempDir = await mkdtemp(join(tmpdir(), "clockify-cli-"));
     process.env.CLOCKIFY_CONFIG_DIR = tempDir;
 
     const config = {
@@ -53,7 +53,7 @@ describe("config store", () => {
   });
 
   it("returns null for invalid stored config", async () => {
-    tempDir = await mkdtemp(join(tmpdir(), "clockfy-cli-"));
+    tempDir = await mkdtemp(join(tmpdir(), "clockify-cli-"));
     process.env.CLOCKIFY_CONFIG_DIR = tempDir;
 
     await writeFile(
@@ -66,7 +66,7 @@ describe("config store", () => {
   });
 
   it("returns null when config file is missing", async () => {
-    tempDir = await mkdtemp(join(tmpdir(), "clockfy-cli-"));
+    tempDir = await mkdtemp(join(tmpdir(), "clockify-cli-"));
     process.env.CLOCKIFY_CONFIG_DIR = tempDir;
     await expect(loadConfig()).resolves.toBeNull();
   });

@@ -29,11 +29,35 @@ const STOP_WORDS = new Set([
   "were",
 ]);
 
-function titleCaseWord(word: string): string {
+export function titleCaseWord(word: string): string {
   if (/^[A-Z]{2,10}-\d+$/.test(word)) {
     return word;
   }
-  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  return word
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+export function formatTaskList(descriptions: string[]): string {
+  const names = descriptions.map((description) => description.trim()).filter(Boolean);
+  if (names.length === 0) {
+    throw new Error("At least one task is required.");
+  }
+  if (names.length === 1) {
+    return names[0]!;
+  }
+  if (names.length === 2) {
+    return `${names[0]} and ${names[1]}`;
+  }
+
+  const last = names[names.length - 1];
+  return `${names.slice(0, -1).join(", ")} and ${last}`;
+}
+
+export function buildCombinedTaskShortDescription(descriptions: string[]): string {
+  return formatTaskList(descriptions.map(titleCaseWord));
 }
 
 export function buildShortDescription(input: string, maxLength = 50): string {

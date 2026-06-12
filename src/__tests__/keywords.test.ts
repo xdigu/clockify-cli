@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { buildShortDescription } from "../utils/keywords";
+import { buildCombinedTaskShortDescription, buildShortDescription } from "../utils/keywords";
 
 describe("buildShortDescription", () => {
   it("preserves ticket ids and removes stop words", () => {
@@ -22,5 +22,11 @@ describe("buildShortDescription", () => {
 
   it("keeps ticket ids uppercase in short descriptions", () => {
     expect(buildShortDescription("PROJ-123 release")).toBe("PROJ-123 Release");
+  });
+
+  it("preserves commas and and in combined lunch task lists", () => {
+    expect(buildCombinedTaskShortDescription(["task1", "task2", "task3", "task4"])).toBe(
+      "Task1, Task2, Task3 and Task4",
+    );
   });
 });
