@@ -2,6 +2,10 @@
   "name": "@xdigu/clockify-cli",
   "version": "0.1.0",
   "description": "Interactive CLI to log time entries to Clockify",
+  "repository": {
+    "type": "git",
+    "url": "github:xdigu/clockify-cli"
+  },
   "type": "module",
   "bin": {
     "clockify-cli": "./dist/cli.js",

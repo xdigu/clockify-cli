@@ -65,10 +65,10 @@ Store the key securely (e.g., in a password manager). If you lose it, generate a
 npm install -g @xdigu/clockify-cli
 
 # 2. Run setup (enter your Clockify API key and select a workspace)
-clockify-cli setup
+clockify setup
 
 # 3. Log time for today
-clockify-cli log
+clockify log
 
 # Done. Entries are created in Clockify automatically.
 ```
@@ -79,7 +79,7 @@ clockify-cli log
 
 ### Commands
 
-#### `clockify-cli setup [--force]`
+#### `clockify setup [--force]`
 
 Interactive wizard that configures your API key, workspace, and work/lunch schedule defaults.
 
@@ -89,7 +89,7 @@ Interactive wizard that configures your API key, workspace, and work/lunch sched
 
 If a config already exists and `--force` is not provided, the wizard asks whether to reconfigure. When credentials are already set, it lets you update **work time** or **credentials** only.
 
-#### `clockify-cli log [--date <YYYY-MM-DD>] [--project-last]`
+#### `clockify log [--date <YYYY-MM-DD>] [--project-last]`
 
 Interactive flow for logging time. You enter task descriptions and durations (or total hours with a lunch split), pick a project, preview the entries, and confirm before they are created in Clockify.
 
@@ -100,7 +100,7 @@ Interactive flow for logging time. You enter task descriptions and durations (or
 
 ### Split Modes
 
-When running `clockify-cli log`, you choose one of two modes:
+When running `clockify log`, you choose one of two modes:
 
 1. **Set duration for each task** — enter a manual duration (e.g., `2h`, `1h30m`, `90`) per task. Tasks are scheduled sequentially across the work day, automatically skipping your lunch block.
 
@@ -122,7 +122,7 @@ All duration inputs accept any of the following formats:
 Work/lunch times accept these formats: `9`, `930`, `1330`, `9`, `9h30m`. Example:
 
 ```bash
-clockify-cli setup
+clockify setup
 
 # Prompt → Default work start (e.g. 9, 930, 1330, 9h, or 9h30m): 8h30m
 ```
@@ -170,7 +170,7 @@ The config directory is created with mode `0700` and the config file with mode `
 ### Log time for today (quick flow)
 
 ```bash
-clockify-cli log
+clockify log
 ```
 
 You'll be prompted to:
@@ -185,7 +185,7 @@ You'll be prompted to:
 ### Log time for a specific date
 
 ```bash
-clockify-cli log --date 2026-06-11
+clockify log --date 2026-06-11
 ```
 
 The workflow is the same, but all entries are created for June 11 instead of today.
@@ -193,7 +193,7 @@ The workflow is the same, but all entries are created for June 11 instead of tod
 ### Reconfigure credentials only
 
 ```bash
-clockify-cli setup --force
+clockify setup --force
 # → Choose "API key and workspace" when prompted to select update type.
 ```
 ---
@@ -210,7 +210,7 @@ Yes. Set `CLOCKIFY_API_KEY` in your shell — it takes priority over any value s
 
 ### What happens if I don't have a config yet?
 
-Running `clockify-cli log` without a config automatically triggers the setup wizard (`clockify setup`) so you can configure things immediately.
+Running `clockify log` without a config automatically triggers the setup wizard (`clockify setup`) so you can configure things immediately.
 
 ### Can I use fractional hours like `"7.5"`?
 
@@ -218,4 +218,4 @@ Yes. `7.5` is interpreted as 7 hours and 30 minutes (450 minutes).
 
 ### What happens if a task would exceed my work day's available time?
 
-The tool throws an error: `Task "<name>" exceeds available work time.` Reduce your total or adjust your schedule in `.config/clockify-cli/config.json` via `clockify-cli setup`.
+The tool throws an error: `Task "<name>" exceeds available work time.` Reduce your total or adjust your schedule in `.config/clockify-cli/config.json` via `clockify setup`.
